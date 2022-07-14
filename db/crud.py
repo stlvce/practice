@@ -53,13 +53,12 @@ def update_price(db: Session, price_id: int, price: schemas.PriceCreate):
     db.refresh(item)
     return item
 
-def create_price_pars(db: Session, price: schemas.PriceCreate):
-    PRODUCT_URL = price.url
+def create_price_pars(db: Session, product_url: str):
     headers = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36 Edg/103.0.1264.49"
     }
     
-    page = requests.get(url=PRODUCT_URL, headers=headers)
+    page = requests.get(url=product_url, headers=headers)
     soup = BeautifulSoup(page.content, "lxml")
     
     product_name = soup.find("h1",class_="sc-fubCfw cqjzZF product__title").get_text()
@@ -74,7 +73,7 @@ def create_price_pars(db: Session, price: schemas.PriceCreate):
         dt = datetime.now()
         db_price = models.Price(
             name=product_name,
-            url=PRODUCT_URL,
+            url=product_url,
             price=product_price,
             price_int=product_price_int,
             datetime=dt
