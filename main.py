@@ -49,3 +49,10 @@ def delete_price(price_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Price not found")
     crud.delete_price(db, price_id)
     return {"status": "ok"}
+
+@app.post("/parser/", response_model=schemas.Price)
+def create_price_pars(price: schemas.PriceCreate, db: Session = Depends(get_db)):
+    db_price = crud.get_price_by_name(db, name=price.name)
+    if db_price and db_price.price_int == price.price_int:
+        raise HTTPException(status_code=400, detail="Price already exist")
+    return crud.create_price_pars(db=db, price=price)
