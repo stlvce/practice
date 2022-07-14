@@ -7,8 +7,6 @@ from bs4 import BeautifulSoup
 from re import sub
 from decimal import Decimal
 
-from db import crud
-
 def get_price(db: Session, price_id: int):
     return db.query(models.Price).filter(models.Price.id == price_id).first()
 
@@ -69,16 +67,20 @@ def create_price_pars(db: Session, price: schemas.PriceCreate):
     product_price = product_price.replace(",", ".")
     product_price_int = Decimal(sub(r"[^\d\-.]", "", product_price))
 
-    dt = datetime.now()
-    db_price = models.Price(
-        name=product_name,
-        url=PRODUCT_URL,
-        price=product_price,
-        price_int=product_price_int,
-        datetime=dt
-    )
-    db.add(db_price)
-    db.commit()
-    db.refresh(db_price)
-    return db_price
+    db_price = get_price_by_name(db, name=product_name)
+    if db_price and db_price.price_int == product_price_int:
+        return 1
+    else:
+        dt = datetime.now()
+        db_price = models.Price(
+            name=product_name,
+            url=PRODUCT_URL,
+            price=product_price,
+            price_int=product_price_int,
+            datetime=dt
+        )
+        db.add(db_price)
+        db.commit()
+        db.refresh(db_price)
+        return db_price
 

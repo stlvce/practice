@@ -1,3 +1,4 @@
+from xmlrpc.client import Boolean
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -52,7 +53,7 @@ def delete_price(price_id: int, db: Session = Depends(get_db)):
 
 @app.post("/parser/", response_model=schemas.Price)
 def create_price_pars(price: schemas.PriceCreate, db: Session = Depends(get_db)):
-    db_price = crud.get_price_by_name(db, name=price.name)
-    if db_price and db_price.price_int == price.price_int:
+    db_price = crud.create_price_pars(db=db, price=price)
+    if db_price == 1:
         raise HTTPException(status_code=400, detail="Price already exist")
-    return crud.create_price_pars(db=db, price=price)
+    return db_price
