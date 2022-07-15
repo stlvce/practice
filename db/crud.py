@@ -57,14 +57,28 @@ def create_price_pars(db: Session, product_url: str):
     headers = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36 Edg/103.0.1264.49"
     }
-    
     page = requests.get(url=product_url, headers=headers)
     soup = BeautifulSoup(page.content, "lxml")
+
+    # Перекресток
+    if product_url[12:23] == "perekrestok":
+        product_name = soup.find("h1",class_="sc-fubCfw cqjzZF product__title").get_text()
+        product_price = soup.find("div", class_="price-new").get_text()
+        product_price = product_price.replace(",", ".")
+        product_price_int = Decimal(sub(r"[^\d\-.]", "", product_price))
+        product_store = "perekrestok"
     
-    product_name = soup.find("h1",class_="sc-fubCfw cqjzZF product__title").get_text()
-    product_price = soup.find("div", class_="price-new").get_text()
-    product_price = product_price.replace(",", ".")
-    product_price_int = Decimal(sub(r"[^\d\-.]", "", product_price))
+    # holodilnik
+    elif product_url[12:22] == "holodilnik":
+        product_name = soup.find("h1", class_="catalog-detail__title").get_text()
+        product_name = product_name.strip()
+        product_price = soup.find("div", class_="catalog-detail__price").get_text()
+        product_price = product_price.replace(" ", "")
+        product_price = product_price.strip()
+        product_price_int = Decimal(sub(r"[^\d\-.]", "", product_price))
+        product_store = "holodilnik"
+    else:
+        return 1
 
     db_price = get_price_by_name(db, name=product_name)
     if db_price and db_price.price_int == product_price_int:
@@ -76,10 +90,15 @@ def create_price_pars(db: Session, product_url: str):
             url=product_url,
             price=product_price,
             price_int=product_price_int,
-            datetime=dt
+            datetime=dt,
+            store=product_store
         )
         db.add(db_price)
         db.commit()
         db.refresh(db_price)
         return db_price
 
+def get_price_by_store(db: Session, store: str):
+    return db.query(models.Price).filter(
+        models.Price.store == store).order_by(models.Price.datetime.desc()).all()
+    

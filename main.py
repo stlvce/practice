@@ -57,3 +57,10 @@ def create_price_pars(product_url: str, db: Session = Depends(get_db)):
     if db_price == 1:
         raise HTTPException(status_code=400, detail="Price already exist")
     return db_price
+
+@app.get("/parser/{product_store}", response_model=List[schemas.Price])
+def read_prices_for_store(product_store: str, db: Session = Depends(get_db)):
+    db_product = crud.get_price_by_store(db=db, store=product_store)
+    if db_product:
+        return db_product
+    raise HTTPException(status_code=404, detail="Store not found")
