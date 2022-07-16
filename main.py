@@ -1,10 +1,11 @@
-from xmlrpc.client import Boolean
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from db import crud, models, schemas
 from db.database import SessionLocal, engine
 from parsers.prod_all import product_all
+from decimal import Decimal
+from re import sub
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -31,9 +32,12 @@ def read_price(price_id: int, db: Session = Depends(get_db)):
 
 @app.post("/prices/", response_model=schemas.Price)
 def create_price(price: schemas.PriceCreate, db: Session = Depends(get_db)):
-    db_price = crud.get_price_by_name(db, name=price.name)
-    if db_price and db_price.price_int == price.price_int:
-        raise HTTPException(status_code=400, detail="Price already exist")
+    db_price = crud.get_price_by_name_all(db, name=price.name)
+    price_int = Decimal(sub(r"[^\d\-.]", "", price.price))
+    for i in db_price:
+        print(int(i.price_int), price_int)
+        if i and int(i.price_int) == int(price_int):
+            raise HTTPException(status_code=400, detail="Price already exist")
     return crud.create_price(db=db, price=price)
 
 @app.put("/prices/{price_id}", response_model=schemas.Price)

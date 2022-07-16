@@ -10,7 +10,7 @@ class PriceBase(BaseModel):
 
 class Price(PriceBase):
     id: int
-    store: str
+    store: str = None
     class Config:
         orm_mode = True
 
