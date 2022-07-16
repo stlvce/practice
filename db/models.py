@@ -1,7 +1,5 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Numeric
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, DateTime, Numeric
 from .database import Base
-
 
 class Price(Base):
     __tablename__ = "price"

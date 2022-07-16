@@ -10,11 +10,6 @@ from parsers.holodilnik import product_holodilnik
 def get_price(db: Session, price_id: int):
     return db.query(models.Price).filter(models.Price.id == price_id).first()
 
-def get_price_by_name(db: Session, name: str):
-    return db.query(models.Price).filter(
-        models.Price.name == name
-    ).order_by(models.Price.datetime.desc()).first()
-
 def get_price_by_name_all(db: Session, name: str):
     return db.query(models.Price).filter(
         models.Price.name == name
@@ -49,10 +44,10 @@ def delete_price(db: Session, price_id: int):
 # Обновление товара
 def update_price(db: Session, price_id: int, price: schemas.PriceCreate):
     item = db.query(models.Price).filter(models.Price.id == price_id).first()
-    price_int = Decimal(sub(r"[^\d\-.]", "", price.price))
     item.name = price.name
     item.url = price.url
     item.price = price.price
+    price_int = Decimal(sub(r"[^\d\-.]", "", price.price))
     item.price_int = price_int
     db.add(item)
     db.commit()

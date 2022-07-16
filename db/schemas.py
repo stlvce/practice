@@ -1,16 +1,14 @@
 from pydantic import BaseModel
-from typing import List, Union
-
 
 class PriceBase(BaseModel):
     name: str
     url: str = None
     price: str
     price_int: int
+    store: str = None
 
 class Price(PriceBase):
     id: int
-    store: str = None
     class Config:
         orm_mode = True
 
