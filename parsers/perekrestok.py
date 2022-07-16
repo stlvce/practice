@@ -14,6 +14,7 @@ def product_perekrestok(product_url: str):
     product_price = soup.find("div", class_="price-new").get_text()
     product_price = product_price.replace(",", ".")
     product_price_int = Decimal(sub(r"[^\d\-.]", "", product_price))
+    product_price_int = int(product_price_int)
     product_store = "perekrestok"
 
     return [product_name, product_price, product_price_int, product_store]

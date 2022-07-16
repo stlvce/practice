@@ -77,6 +77,7 @@ def create_price_pars(db: Session, product_url: str):
         db.refresh(db_price)
         return db_price
 
+# Запрос товаров по магазину
 def get_price_by_store(db: Session, store: str):
     return db.query(models.Price).filter(
         models.Price.store == store).order_by(models.Price.datetime.desc()).all()

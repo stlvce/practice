@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from db import crud, models, schemas
 from db.database import SessionLocal, engine
+from parsers.prod_all import product_all
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -53,10 +54,17 @@ def delete_price(price_id: int, db: Session = Depends(get_db)):
 
 @app.post("/parser/", response_model=schemas.Price)
 def create_price_pars(product_url: str, db: Session = Depends(get_db)):
-    db_price = crud.create_price_pars(db=db, product_url=product_url)
-    if db_price == 1:
+    # Добавление товара из определенного магазина
+    if product_url[12:23] == "perekrestok" or product_url[12:22] == "holodilnik":
+        db_price = crud.create_price_pars(db=db, product_url=product_url)
+        if db_price == 1:
+            raise HTTPException(status_code=400, detail="Price already exist")
+        return db_price
+    # Добавить сразу несколько товаров из Перекрестка
+    elif product_url == "all":
+        product_all(db=db)
+    else:
         raise HTTPException(status_code=400, detail="Price already exist")
-    return db_price
 
 @app.get("/parser/{product_store}", response_model=List[schemas.Price])
 def read_prices_for_store(product_store: str, db: Session = Depends(get_db)):
