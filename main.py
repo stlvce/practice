@@ -51,7 +51,7 @@ def delete_price(price_id: int, db: Session = Depends(get_db)):
     crud.delete_price(db, price_id)
     return {"status": "ok"}
 
-@app.post("/parser/}", response_model=schemas.Price)
+@app.post("/parser/", response_model=schemas.Price)
 def create_price_pars(product_url: str, db: Session = Depends(get_db)):
     db_price = crud.create_price_pars(db=db, product_url=product_url)
     if db_price == 1:
